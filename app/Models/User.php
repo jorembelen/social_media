@@ -25,10 +25,12 @@ class User extends Authenticatable
         'last_name',
         'username',
         'email',
+        'last_seen',
         'password',
     ];
 
     public $incrementing = false;
+    protected $dates = ['last_seen'];
 
     /**
      * The attributes that should be hidden for serialization.
@@ -111,7 +113,28 @@ class User extends Authenticatable
 
     public function friends()
     {
-        return $this->hasMany(UserConnection::class, 'friend_id');
+        return $this->hasMany(UserConnection::class);
     }
+
+    public function friendsOfMine()
+    {
+        return $this->belongsToMany(User::class, 'user_connections', 'user_id', 'friend_id');
+    }
+
+    public function friendOf()
+    {
+        return $this->belongsToMany(User::class, 'user_connections', 'friend_id', 'user_id');
+    }
+
+    public function userFriends()
+    {
+        return $this->friendsOfMine()->wherePivot('status', 1)->get()->merge($this->friendOf()->wherePivot('status', 1)->get());
+    }
+
+    public function userFriendIds()
+    {
+        return $this->friendsOfMine()->pluck('user_id', 'friend_id')->merge($this->friendOf()->pluck('user_id', 'friend_id'));
+    }
+
 
 }

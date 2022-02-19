@@ -18,6 +18,7 @@ class CreateChatsTable extends Migration
             $table->uuid('user_id')->constrained('users');
             $table->uuid('friend_id')->constrained('users');
             $table->string('content');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }

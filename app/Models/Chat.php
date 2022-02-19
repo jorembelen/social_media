@@ -13,6 +13,17 @@ class Chat extends Model
         'user_id',
         'friend_id',
         'content',
+        'read_at',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'friend_id');
+    }
 
 }

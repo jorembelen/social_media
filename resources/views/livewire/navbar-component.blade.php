@@ -26,9 +26,9 @@
                                 <a class="nav-link active" href="/">Home</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="find_connections.html">Find Connections</a>
+                                <a class="nav-link" href="{{ route('connections') }}">Find Connections</a>
                             </li>
-                            <li class="nav-item">
+                            {{-- <li class="nav-item">
                                 <a class="nav-link" href="all_jobs.html">Jobs</a>
                             </li>
                             <li class="nav-item">
@@ -193,7 +193,7 @@
                                         </ul>
                                     </li>
                                 </ul>
-                            </li>
+                            </li> --}}
                         </ul>
                     </div>
                     <div class="msg-noti-acnt-section order-2">
@@ -202,7 +202,7 @@
                                 <a class="mn-link" href="{{ route('messages', auth()->id()) }}" role="button">
                                     <i class="fas fa-envelope"></i>
                                     <div class="alert-circle">
-                                        <span class="badge badge-danger nav-link-badge">2</span>
+                                        <span class="badge badge-danger nav-link-badge">{{ auth()->user()->unreadMessages() }}</span>
                                     </div>
                                 </a>
                             </li>
@@ -216,14 +216,14 @@
                             </li>
                             <li class="mn-icon dropdown dropdown-account">
                                 <a href="#" class="opts_account" role="button" data-bs-toggle="dropdown">
-                                    <img avatar="{{ auth()->user()->getFullName() }}" alt="">
+                                    <img src="/assets/images/left-imgs/img-{{ auth()->user()->avatar() }}.jpg" alt="">
                                     <i class="fas fa-caret-down arrow-icon"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-account dropdown-menu-end">
                                     <li class="media-list">
                                         <div class="media">
                                             <div class="media-left">
-                                                <img class="ft-plus-square icon-bg-circle bg-cyan mr-0" avatar="{{ auth()->user()->getFullName() }}" alt="">
+                                                <img class="ft-plus-square icon-bg-circle bg-cyan mr-0" src="/assets/images/left-imgs/img-{{ auth()->user()->avatar() }}.jpg" alt="">
                                             </div>
                                             <div class="media-body">
                                                 <h6 class="media-heading text-16">{{ auth()->user()->getFullName() }}</h6>

@@ -143,7 +143,16 @@
     <script src="/assets/js/custom.js"></script>
     <script src="/assets/js/night-mode.js"></script>
 
+    @include('scripts.avatar')
 
+    <script>
+        window.addEventListener('show-form', function (event) {
+        $('#addModal').modal('show');
+        });
+        window.addEventListener('hide-form', function (event) {
+        $('#addModal').modal('hide');
+    });
+    </script>
     @livewireScripts
 
 </body>

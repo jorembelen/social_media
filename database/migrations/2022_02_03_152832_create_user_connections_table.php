@@ -17,6 +17,7 @@ class CreateUserConnectionsTable extends Migration
             $table->id();
             $table->uuid('user_id')->constrained('users');
             $table->uuid('friend_id')->constrained('users');
+            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }

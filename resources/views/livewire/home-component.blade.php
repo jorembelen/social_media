@@ -10,12 +10,15 @@
 
                 <div class="full-width mb-30">
                     <div class="home-upload-links">
-                        <a href="#" class="home-upload-cate add_post"><i class="fas fa-edit"></i>Add Post</a>
-                        <a href="post_a_job.html" class="home-upload-cate"><i class="fas fa-briefcase"></i>Post a Job</a>
+                        <a href="#" class="home-upload-cate" wire:click.prevent="addPost"><i class="fas fa-edit"></i>Add Post</a>
+                        {{-- <a href="post_a_job.html" class="home-upload-cate"><i class="fas fa-briefcase"></i>Post a Job</a>
                         <a href="add_product.html" class="home-upload-cate"><i class="fas fa-shopping-cart"></i>Add Product</a>
-                        <a href="#" class="home-upload-cate add_course_popup"><i class="fas fa-book"></i>Add Course</a>
+                        <a href="#" class="home-upload-cate add_course_popup"><i class="fas fa-book"></i>Add Course</a> --}}
                     </div>
                 </div>
+
+
+
                 @if (session()->has('message'))
                 <div class="col-lg-12 col-md-12">
                     <div class="alert alert-danger alert-action mt-4 mb-4">
@@ -129,7 +132,7 @@
                         <div class="posts-list">
                             <div class="feed-shared-author-dt">
                                 <div class="author-left" wire:ignore>
-                                    <a href="#"><img class="ft-plus-square job-bg-circle bg-cyan mr-0" avatar="{{ $post->user->getFullName() }}" alt=""></a>
+                                    <a href="#"><img class="ft-plus-square job-bg-circle bg-cyan mr-0" src="/assets/images/left-imgs/img-{{ $post->user->avatar() }}.jpg" alt=""></a>
                                 </div>
                                 <div class="author-dts">
                                     <a href="#" class="job-heading">{{ $post->user->getFullName() }}</a>
@@ -155,6 +158,11 @@
                         <div class="post-meta">
                             <div class="feed-shared-dt-1">
                                 <p class="mb-0">{{ $post->content }}</p>
+                                @if ($post->image)
+                                    <div class="post-img">
+                                        <img src="{{ $post->image_url }}" alt="">
+                                    </div>
+                                @endif
                             </div>
                             <div class="feed-shared-result">
                                 <ul class="social-counts">
@@ -176,113 +184,117 @@
                                     @else
                                     <button class="react-button__trigger action-btn" wire:click.prevent="like('{{ $post->id }}')"><i class="fas fa-thumbs-up icon-mr"></i>Like</button>
                                     @endif
-                                    <button class="react-button__comment action-btn leave_a_comment"><i class="fas fa-comment-alt icon-mr"></i>Comment</button>
+                                    @if ($commentId == $post->id)
+                                    <button class="react-button__comment action-btn leave_a_comment" wire:click.prevent="hideComment({{ $post->id }})"><i class="fas fa-comment-alt icon-mr"></i>Comment</button>
+                                    @else
+                                    <button class="react-button__comment action-btn leave_a_comment" wire:click.prevent="showComment({{ $post->id }})"><i class="fas fa-comment-alt icon-mr"></i>Comment</button>
+                                    @endif
                                 </div>
                                 {{-- <div class="reactions-button-right">
                                     <button class="react-button__share action-btn"><i class="fas fa-share-alt icon-mr"></i>Share</button>
                                 </div> --}}
                             </div>
                         </div>
-                        <div class="comment_wrapper main-comment-section" wire:ignore.self>
-                            <ul class="we-comment-dt">
+                        <div class="main-comment-section" wire:ignore.self>
                                 @php
-                                $postComments = \App\Models\PostComment::with(['user', 'post'])->wherepost_id($post->id)->take($commentDisplay)->latest()->get();
-                                $totalComment = $post->comments->pluck('id')->count();
+                                    $postComments = \App\Models\PostComment::with(['user', 'post'])->wherepost_id($post->id)->take($commentDisplay)->latest()->get();
+                                    $totalComment = $post->comments->pluck('id')->count();
                                 @endphp
-                                @foreach ($postComments as $comment)
-                                <li>
-                                    <div class="comet-avatar" wire:ignore>
-                                        <img avatar="{{ $comment->user->getFullName() }}" alt="">
-                                    </div>
-                                    <div class="we-comment">
-                                        <a href="#" title="" class="user-name">{{ $comment->user->getFullName() }}</a>
-                                        <p>{{ $comment->content }}</p>
-                                        <div class="inline-itms">
-                                            <span>{{ $comment->created_at->diffForHumans() }}</span>
-                                            <a class="we-reply" href="#" title="Reply" wire:click.prevent="replyComment('{{ $comment->id }}')"><i class="fa fa-reply"></i></a>
-                                            @if ($comment->userLikePostComment() == true)
-                                            <a href="#" title="" wire:click.prevent="commentUnlike({{ $comment->id }})"><i class="fas fa-thumbs-up" style="color:blue"></i>
-                                                @else
-                                                <a href="#" title="" wire:click.prevent="commentLike({{ $comment->id }})"><i class="fas fa-thumbs-up"></i>
-                                                    @endif
-                                                    <span class="social-counts-reactions-count">{{ $comment->postCommentLikesCount() }}</span>
-                                                </a>
-                                            </div>
-
+                            @if ($commentId == $post->id)
+                                <ul class="we-comment-dt">
+                                    @foreach ($postComments as $comment)
+                                    <li>
+                                        <div class="comet-avatar" wire:ignore>
+                                            <img src="/assets/images/left-imgs/img-{{ $comment->user->avatar() }}.jpg" alt="">
                                         </div>
-
-                                            {{-- This is the comment reply area --}}
-                                            @php
-                                                $commentReply = \App\Models\PostCommentReply::with(['user'])->wherepost_comment_id($comment->id)->get();
-                                            @endphp
-
-                                            @foreach ($commentReply as $data)
-                                                <div class="comet-avatar" wire:ignore>
-                                                        <img avatar="{{ $data->user->getFullName() }}" alt="">
+                                        <div class="we-comment">
+                                            <a href="#" title="" class="user-name">{{ $comment->user->getFullName() }}</a>
+                                            <p>{{ $comment->content }}</p>
+                                            <div class="inline-itms">
+                                                <span>{{ $comment->created_at->diffForHumans() }}</span>
+                                                <a class="we-reply" href="#" title="Reply" wire:click.prevent="replyComment('{{ $comment->id }}')"><i class="fa fa-reply"></i></a>
+                                                @if ($comment->userLikePostComment() == true)
+                                                <a href="#" title="" wire:click.prevent="commentUnlike({{ $comment->id }})"><i class="fas fa-thumbs-up" style="color:blue"></i>
+                                                    @else
+                                                    <a href="#" title="" wire:click.prevent="commentLike({{ $comment->id }})"><i class="fas fa-thumbs-up"></i>
+                                                        @endif
+                                                        <span class="social-counts-reactions-count">{{ $comment->postCommentLikesCount() }}</span>
+                                                    </a>
                                                 </div>
-                                                <div class="we-comment">
-                                                    <a href="#" title="" class="user-name">{{ $data->user->getFullName() }} replied</a>
-                                                    <p>{{ $data->content }}</p>
-                                                    <div class="inline-itms">
-                                                        <span>{{ $data->created_at->diffForHumans() }}</span>
+
+                                            </div>
+
+                                                {{-- This is the comment reply area --}}
+                                                @php
+                                                    $commentReply = \App\Models\PostCommentReply::with(['user'])->wherepost_comment_id($comment->id)->get();
+                                                @endphp
+
+                                                @foreach ($commentReply as $data)
+                                                    <div class="comet-avatar" wire:ignore>
+                                                            <img src="/assets/images/left-imgs/img-{{ $data->user->avatar() }}.jpg" alt="">
+                                                    </div>
+                                                    <div class="we-comment">
+                                                        <a href="#" title="" class="user-name">{{ $data->user->getFullName() }} replied</a>
+                                                        <p>{{ $data->content }}</p>
+                                                        <div class="inline-itms">
+                                                            <span>{{ $data->created_at->diffForHumans() }}</span>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+
+
+                                                {{-- Write you reply here --}}
+                                                @if ($reply == $comment->id)
+                                                <div class="post-commet-textarea mt-2">
+                                                    <div class="post-base-1 post_comment_combo">
+                                                        <div class="post-base-1">
+                                                            <textarea class="auto-resize comment-textarea textarea" placeholder="Write a reply" autocomplete="off" wire:model.lazy="comReply"></textarea>
+                                                            @error('comReply') <span class="text-danger">{{ $message }}</span> @enderror
+                                                            <div class="post-base-1 comment_option_footer">
+                                                                {{-- <div class="img-add">
+                                                                    <input type="file" id="file4">
+                                                                    <label for="file4"><i class="fas fa-image"></i></label>
+                                                                </div> --}}
+                                                                <div class="emoji-panel">
+                                                                    <button class="emoji-combo"><i class="fas fa-paper-plane" wire:click.prevent="addComReply('{{ $comment->id }}')"></i></button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                @endif
+
+                                            </li>
                                             @endforeach
-
-
-                                            {{-- Write you reply here --}}
-                                            @if ($reply == $comment->id)
-                                            <div class="post-commet-textarea mt-2">
-                                                <div class="post-base-1 post_comment_combo">
-                                                    <div class="post-base-1">
-                                                        <textarea class="auto-resize comment-textarea textarea" placeholder="Write a reply" autocomplete="off" wire:model.lazy="comReply"></textarea>
-                                                        @error('comReply') <span class="text-danger">{{ $message }}</span> @enderror
-                                                        <div class="post-base-1 comment_option_footer">
-                                                            {{-- <div class="img-add">
-                                                                <input type="file" id="file4">
-                                                                <label for="file4"><i class="fas fa-image"></i></label>
-                                                            </div> --}}
-                                                            <div class="emoji-panel">
-                                                                <button class="emoji-combo"><i class="fas fa-paper-plane" wire:click.prevent="addComReply('{{ $comment->id }}')"></i></button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                            @if ($totalComment > $commentDisplay)
+                                            <li>
+                                                <div class="viewcmnts">
+                                                    <span class="pointer" wire:click.prevent="loadComment">View more comments</span>
                                                 </div>
-                                            </div>
+                                            </li>
                                             @endif
+                                            <li>
+                                                <div class="post-commet-textarea">
+                                                    <div class="post-base-1 post_comment_combo">
+                                                        <img src="/assets/images/left-imgs/img-3.jpg" alt="">
+                                                        <div class="post-base-1">
+                                                            <textarea class="auto-resize comment-textarea textarea" placeholder="Write a comment" autocomplete="off" wire:model.lazy="content"></textarea>
+                                                            <div class="post-base-1 comment_option_footer">
 
-
-
-                                        </li>
-                                        @endforeach
-                                        @if ($totalComment > $commentDisplay)
-                                        <li>
-                                            <div class="viewcmnts">
-                                                <span class="pointer" wire:click.prevent="loadComment">View more comments</span>
-                                            </div>
-                                        </li>
-                                        @endif
-                                        <li>
-                                            <div class="post-commet-textarea">
-                                                <div class="post-base-1 post_comment_combo">
-                                                    <img src="/assets/images/left-imgs/img-3.jpg" alt="">
-                                                    <div class="post-base-1">
-                                                        <textarea class="auto-resize comment-textarea textarea" placeholder="Write a comment" autocomplete="off" wire:model.lazy="content"></textarea>
-                                                        <div class="post-base-1 comment_option_footer">
-
-                                                            <div class="emoji-panel">
-                                                                <button class="emoji-combo"><i class="fas fa-paper-plane" wire:click.prevent="addComment('{{ $post->id }}')"></i></button>
+                                                                <div class="emoji-panel">
+                                                                    <button class="emoji-combo"><i class="fas fa-paper-plane" wire:click.prevent="addComment('{{ $post->id }}')"></i></button>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </li>
-                                        @if (session()->has('content')) <span class="text-danger text-center">  {{ session('content') }}</span> @endif
-                                    </ul>
+                                            </li>
+                                            @if (session()->has('content')) <span class="text-danger text-center">  {{ session('content') }}</span> @endif
+                                        </ul>
+                            @endif
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                         @endforeach
 
                         {{-- <div class="full-width mb-30">
@@ -433,59 +445,72 @@
                 </div>
             </div>
 
-            <div class="popup-wrapper1 " id="addModal" wire:ignore.self>
-                <div class="popup post-sharing">
-                    <span class="popup-closed"><i class="far fa-window-close"></i></span>
-                    <div class="popup-meta">
-                        <div class="popup-head">
-                            <h4>Add Post</h4>
+
+
+
+        <div class="modal" tabindex="-1" id="addModal" wire:ignore.self>
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">Add Post</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="add-post-section lead emoji-picker-container">
+                        <div class="add-textarea-dt">
+                            <textarea class="add-post-textarea" placeholder="Share your thoughts..." wire:model.lazy="content"></textarea>
+                            @error('content') <span class="text-danger" style="font-size: 15px;">{{ $message }}</span> @enderror <br>
+                            @error('image') <span class="text-danger" style="font-size: 15px;">{{ $message }}</span> @enderror
                         </div>
-                        <div class="popup-body">
-                            <div class="add-post-section lead emoji-picker-container">
-                                <div class="add-textarea-dt">
-                                    <textarea class="add-post-textarea" placeholder="Share your thoughts..." wire:model.lazy="content"></textarea>
-                                    @error('body') <span class="text-danger">{{ $message }}</span> @enderror <br>
-                                    @error('image') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                                <div class="add-post-items">
-                                    <div class="add-left-items">
-                                        <ul>
-                                            <li>
-                                                <div class="upload-icon">
-                                                    <input type="file" id="file1" wire:model="image">
-                                                    <label for="file1" title="Image"><i class="fas fa-camera"></i><span class="icon-text">Image</span></label>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="add-right-items">
-                                        <ul>
-                                            <li>
-                                                <span class="tag-hash" title="Hashtag"><i class="fas fa-hashtag"></i></span>
-                                            </li>
-                                            <li>
-                                                <span class="tag-hash" title="Tag"><i class="fas fa-at"></i></span>
-                                            </li>
-                                            <li>
-                                                <div class="emoji-panel">
-                                                    <button class="emoji-combo" title="Emo"><i class="fas fa-smile"></i></button>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                        <div class="add-post-items">
+                            <div class="add-left-items">
+                                <ul>
+                                    <li>
+                                        <div class="upload-icon">
+                                            <input type="file" id="file1" wire:model="image">
+                                            <label for="file1" title="Image"><i class="fas fa-camera"></i>
+                                                <span class="icon-text">
+                                                    @if ($image)
+                                                    {{ $image->getClientOriginalName()}}
+                                                    @else
+                                                    Image
+                                                    @endif
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </li>
+                                </ul>
+                                @if ($image)
+                                <img src="{{ $image->temporaryUrl() }}" class="img img-circle d-block" width="150px;" alt="">
+                                @endif
                             </div>
-                        </div>
-                        <div class="postbox">
-                            <div class="share-submit-btns">
-                                <button class="main-btn cancel">Cancel</button>
-                                <button class="main-btn color btn-hover" wire:click.prevent="post">Publish</button>
+                            <div class="add-right-items">
+                                <ul>
+                                    <li>
+                                        <span class="tag-hash" title="Hashtag"><i class="fas fa-hashtag"></i></span>
+                                    </li>
+                                    <li>
+                                        <span class="tag-hash" title="Tag"><i class="fas fa-at"></i></span>
+                                    </li>
+                                    <li>
+                                        <div class="emoji-panel">
+                                            <button class="emoji-combo" title="Emo"><i class="fas fa-smile"></i></button>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
+                <div class="modal-footer">
+                  <button class="main-btn cancel" data-bs-dismiss="modal">Cancel</button>
+                  <button class="main-btn color btn-hover" wire:click.prevent="post">Publish</button>
+                </div>
+              </div>
             </div>
+          </div>
 
-        </div>
 
-@include('scripts.avatar')
+
+
+</div>

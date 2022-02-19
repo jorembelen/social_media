@@ -4,14 +4,14 @@
             <div class="user-profile">
                 <div class="username-dt dpbg-1">
                     <div class="usr-pic" wire:ignore>
-                        <img avatar="{{ auth()->user()->getFullName() }}" alt="">
+                        <img src="/assets/images/left-imgs/img-{{ auth()->user()->avatar() }}.jpg" alt="">
                     </div>
                 </div>
                 <div class="username-main-dt">
                     <h4>{{ auth()->user()->getFullName() }}</h4>
                     {{-- <span>{{ auth()->user()->email }}</span> --}}
                 </div>
-                <div class="user-info__badges">
+                {{-- <div class="user-info__badges">
                     <ul class="badges">
                         <li>
                             <span class="community-badges__badge-wrapper--s community-badges__badge-wrapper--responsive-xs ">
@@ -79,7 +79,7 @@
                             </span>
                         </li>
                     </ul>
-                </div>
+                </div> --}}
                 <div class="user-info__sections">
                     <ul class="info__sections">
                         <li>
@@ -100,7 +100,7 @@
                                 <span class="all-info__right">120</span>
                             </div>
                         </li>
-                        <li>
+                        {{-- <li>
                             <div class="all-info__sections">
                                 <span class="all-info__left">Post Jobs</span>
                                 <span class="all-info__right">5</span>
@@ -123,7 +123,7 @@
                                 <span class="all-info__left">Pages</span>
                                 <span class="all-info__right">2</span>
                             </div>
-                        </li>
+                        </li> --}}
                     </ul>
                 </div>
                 <div class="profile-link">
@@ -131,7 +131,7 @@
                 </div>
             </div>
         </div>
-        <div class="full-width mt-30 mb-30">
+        {{-- <div class="full-width mt-30 mb-30">
             <div class="user-profile">
                 <div class="explore-heading">
                     <h4>Explore</h4>
@@ -229,7 +229,7 @@
                     <a href="find_connections.html">Explore More</a>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </aside>
     <aside class="col col-xl-3 order-xl-3 col-lg-6 order-lg-3 col-md-6 col-sm-12 col-12">
         {{-- <div class="full-width mb-30 rrmt-30 lgmt-30">
@@ -309,29 +309,32 @@
         <div class="full-width mb-30">
             <div class="user-profile">
                 <div class="explore-heading">
-                    <h4>Suggestions Peoples</h4>
+                    <h4>People you may know</h4>
                 </div>
                 <div class="user-info__sections" wire:ignore>
                     <ul class="info__sections p-0">
                         @foreach ($users as $user)
                             <li class="broswe-member-container ember-view">
                                 <a href="#" class="browse-profile">
-                                    <img class="broswse-member-image" avatar="{{ $user->getFullName() }}" alt="">
+                                    <img class="broswse-member-image" src="/assets/images/left-imgs/img-{{ $user->avatar() }}.jpg" alt="">
                                     <div class="browse-member-detail">
                                         <h4 class="browse-member-name">{{ $user->getFullName() }}</h4>
                                         <span class="browse-member-headline">0 mutual friends</span>
                                     </div>
                                 </a>
-                                <div class="browse-member-btn">
-                                    <button class="all-info__right add-btn request-btn" title="Add Friend" wire:click.prevent="addFriend('{{ $user->id }}')"><i class="fas fa-user-plus"></i></button>
-                                </div>
+
+                                @if ($user->pendingFriendRequest() == false)
+                                    <div class="browse-member-btn">
+                                        <button class="all-info__right add-btn request-btn" title="Add Friend" wire:click.prevent="addFriend('{{ $user->id }}')"><i class="fas fa-user-plus"></i></button>
+                                    </div>
+                                @endif
                             </li>
                         @endforeach
 
                     </ul>
                 </div>
                 <div class="profile-link">
-                    <a href="explore_connections.html">View All Peoples</a>
+                    <a href="{{ route('peoples.list') }}">View All Peoples</a>
                 </div>
             </div>
         </div>
@@ -349,7 +352,7 @@
         </div>
         <div class="full-width mb-30 res-bnr-dt">
             <div class="responsive-banner">
-                <span>Learning Plateform</span>
+                <span>Learning Platform</span>
                 <h4>Keep learning in the moments that matter.</h4>
                 <button class="main-btn color btn-hover" onclick="window.location.href='all_learning.html'">See Courses</button>
             </div>

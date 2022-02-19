@@ -24,33 +24,37 @@
                                 <li class="nav-item">
                                     <a class="nav-link active" data-bs-toggle="pill" href="#users-message" role="tab">
                                         <i class="fas fa-user me-2"></i>Friends
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-bs-toggle="pill" href="#groups-message" role="tab">
-                                        <i class="fas fa-users me-2"></i>Groups
-                                    </a>
-                                </li>
-                            </ul>
-                            <div class="tab-content mt-30">
-                                <div class="tab-pane fade active show" id="users-message" role="tabpanel">
-                                    <div class="user-message-chat-list">
-                                        @foreach ($friends as $friend)
-                                        <div class="user-recipients-list active">
-                                            <div class="recipient-avatar" wire:ignore>
-                                                <img avatar="{{ $friend->user->getFullname() }}" loading="lazy" alt="" class="presence-entity__image nt-view-attr__img--centered">
-                                                <div class="presence-entity__badge badge__online">
-                                                    <span class="visually-hidden">
-                                                        Status is online
-                                                    </span>
+                                        </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" data-bs-toggle="pill" href="#groups-message" role="tab">
+                                                <i class="fas fa-users me-2"></i>Groups
+                                                </a>
+                                                </li>
+                                                </ul>
+                                                <div class="tab-content mt-30">
+                                                    <div class="tab-pane fade active show" id="users-message" role="tabpanel">
+                                                        <div class="user-message-chat-list">
+                                            @foreach ($friends as $friend)
+
+                                            <div class="user-recipients-list active">
+                                                <div class="recipient-avatar" wire:ignore>
+                                                    <img src="/assets/images/left-imgs/img-{{ $friend->avatar() }}.jpg" loading="lazy" alt="" class="presence-entity__image nt-view-attr__img--centered">
+                                                    <div class="{{ Cache::has('is_online' .$friend->id) ? 'presence-entity__badge badge__online' : '' }}">
+                                                        <span class="visually-hidden">
+                                                            Status is online
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @php
+                                                    $msg = App\Models\Chat::whereuser_id($friend->id)->pluck('content')->last();
+                                                @endphp
+                                                <div class="msg-right-part">
+                                                    <div class="msg-last-sent" title="1 w">{{ $friend->last_seen->diffForHumans() }}</div>
+                                                    <span class="user-recipient-name" wire:click.prevent="chat('{{ $friend->id }}')">{{ $friend->getFullname() }}</span>
+                                                    <p class=""> {{ $msg }}</p>
                                                 </div>
                                             </div>
-                                            <div class="msg-right-part">
-                                                <div class="msg-last-sent" title="1 w">15m</div>
-                                                <span class="user-recipient-name" wire:click.prevent="chat('{{ $friend->user->id }}')">{{ $friend->user->getFullname() }}</span>
-                                                <p class=""> contact me on my email address i sent to you so that i can tell you more about myself</p>
-                                            </div>
-                                        </div>
                                         @endforeach
 
                                     </div>
@@ -69,6 +73,7 @@
                 </div>
             </div>
 
+
             @if ($chatView == $friendId && $chatView == true)
                 <div class="col-xl-8 col-lg-7 col-md-12">
                     <div class="full-width mb-0 rrmt-30">
@@ -84,32 +89,46 @@
                             <div class="recipients-top-dt">
                                 <div class="msg-usr-dt">
                                     <div class="recipient-avatar">
-                                        <img src="/assets/images/left-imgs/img-2.jpg" loading="lazy" alt="" class="presence-entity__image nt-view-attr__img--centered">
-                                        <div class="presence-entity__badge badge__online">
+                                        <img src="/assets/images/left-imgs/img-{{ $chatInfo->avatar() }}.jpg" loading="lazy" alt="" class="presence-entity__image nt-view-attr__img--centered">
+                                        <div class="{{ Cache::has('is_online' .$chatInfo->id) ? 'presence-entity__badge badge__online' : '' }}">
                                             <span class="visually-hidden">
                                                 Status is online
                                             </span>
                                         </div>
                                     </div>
                                     <div class="recipient-user-dt">
-                                        <a href="#" target="_blank">{{ $chatInfo->getFullName() }}</a>
+                                        <a href="#" target="_blank">{{ $chatInfo->getFullName() }} </a>
                                         <p class="user-last-seen"><span class="small-last-seen">2 d</span></p>
                                     </div>
                                 </div>
                                 <div class="usr-cht-opts-btns">
-                                    <span class="option-icon"><i class="fas fa-phone-alt"></i></span>
-                                    <span class="option-icon"><i class="fas fa-video"></i></span>
-                                    <span class="option-icon"><i class="fas fa-trash-alt"></i></span>
+                                    {{-- <span class="option-icon"><i class="fas fa-phone-alt"></i></span>
+                                    <span class="option-icon"><i class="fas fa-video"></i></span> --}}
+                                    <span class="option-icon" wire:click.prevent="confirm('{{ $friendId }}')"><i class="fas fa-trash-alt"></i></span>
                                 </div>
                             </div>
 
+                            @if (session()->has('message'))
+                                <div class="col-lg-12 col-md-12 mb-2">
+                                    <div class="alert alert-danger alert-action mt-10 mb-0">
+                                        <div class="icon">
+                                            <i class="fa fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div class="text pt5 text-center">
+                                            {{ session('message') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="chat-container" wire:poll.5s>
                                 <div class="chat-content">
                                     <ul class="chats-lists">
                                         @foreach ($chats as $chat)
                                             <li class="{{ $chat->user_id == auth()->id() ? 'me' : 'you' }}">
                                                 <div class="chat-thumb">
-                                                    <img src="/assets/images/left-imgs/{{ $chat->user_id == auth()->id() ? 'img-1' : 'img-2' }}.jpg" alt="">
+                                                    @if ($chat->read_at != null)
+                                                    <img src="/assets/images/left-imgs/img-{{ $chat->user->avatar() }}.jpg" alt="">
+                                                    @endif
                                                 </div>
                                                 <div class="notifi-event">
                                                     <span class="chat-msg-item">
@@ -135,10 +154,13 @@
                                             </div>
                                         </div>
                                         <textarea class="form-control custom-controls" placeholder="Write Something.." wire:model.lazy="message"></textarea>
-                                        {{-- <div class="emoji-panel" data-toggle="tooltip" data-placement="top" title="Emoji">
+                                        {{-- <div class="" style="size:12px;">
+                                            <a href="#">@emojione(':frown:')</a>
+                                        </div> --}}
+                                        <div class="emoji-panel" data-toggle="tooltip" data-placement="top" title="Emoji">
                                             <button class="emoji-combo ml-2"><i class="fas fa-smile"></i></button>
                                         </div>
-                                        <div class="mic_recording-icon" data-toggle="tooltip" data-placement="top" title="Audio Recording">
+                                        {{-- <div class="mic_recording-icon" data-toggle="tooltip" data-placement="top" title="Audio Recording">
                                             <button class="mic-record"><i class="fas fa-microphone"></i></button>
                                         </div> --}}
                                     </div>
@@ -157,7 +179,7 @@
         </div>
     </div>
 
-    <div class="popup-wrapper29">
+    <div class="popup-wrapper29" wire:ignore>
 		<div class="popup post-sharing">
 			<span class="popup-closed"><i class="far fa-window-close"></i></span>
 			<div class="popup-meta">

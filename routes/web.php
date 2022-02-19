@@ -1,7 +1,12 @@
 <?php
 
+use App\Http\Livewire\FriendsList;
 use App\Http\Livewire\HomeComponent;
+use App\Http\Livewire\PeoplesList;
 use App\Http\Livewire\Users\Address;
+use App\Http\Livewire\Users\Connections;
+use App\Http\Livewire\Users\FriendRequest;
+use App\Http\Livewire\Users\FriendSent;
 use App\Http\Livewire\Users\Location;
 use App\Http\Livewire\Users\Messages;
 use App\Http\Livewire\Users\Notifications;
@@ -38,6 +43,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/location', Location::class)->name('location');
     Route::get('/privacy', Privacy::class)->name('privacy');
     Route::get('/sessions', Sessions::class)->name('sessions');
+    Route::get('/connections', Connections::class)->name('connections');
+    Route::get('/friends-request', FriendRequest::class)->name('friends.request');
+    Route::get('/friends-sent', FriendSent::class)->name('friends.sent');
+    Route::get('/friends-list', FriendsList::class)->name('friends.list');
+    Route::get('/peoples-list', PeoplesList::class)->name('peoples.list');
     Route::get('/messages/{id}', Messages::class)->name('messages');
     Route::get('/notification-settings', NotificationSettings::class)->name('settings.notification');
 });

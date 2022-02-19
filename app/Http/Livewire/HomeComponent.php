@@ -18,6 +18,7 @@ class HomeComponent extends Component
     public $body, $image, $post, $content, $reply, $comReply;
     public $amount = 3;
     public $commentDisplay = 3;
+    public $commentId;
     protected $listeners = ['refreshHome' => '$refresh'];
 
     protected function rules()
@@ -28,6 +29,20 @@ class HomeComponent extends Component
         ];
     }
 
+    public function addPost()
+    {
+      $this->dispatchBrowserEvent('show-form');
+    }
+
+    public function showComment($commentId)
+    {
+        $this->commentId = $commentId;
+    }
+
+    public function hideComment($commentId)
+    {
+        $this->commentId = null;
+    }
 
     public function post()
     {
@@ -40,10 +55,13 @@ class HomeComponent extends Component
         $user = User::find(auth()->id());
         DB::beginTransaction();
         if($user){
+            if($this->image){
+                $validatedData['image'] = $this->image->store('/', 'uploads');
+            }
             $user->addPost($validatedData);
             DB::commit();
             session()->flash('message', 'Post was added.');
-            return redirect()->route('home');
+            $this->dispatchBrowserEvent('hide-form');
 
         }else{
             DB::rollBack();
@@ -61,9 +79,11 @@ class HomeComponent extends Component
         $posts = Post::with('user')->take($this->amount)->latest()->get();
         $allPost = Post::pluck('id')->count();
         $friendList = auth()->user()->userFriendIds();
+        // $users = User::where('id', '!=', auth()->id())->inRandomOrder()->take(5)->get();
+        // dd($friendList);
         $users = User::where('id', '!=', auth()->id())
             ->whereNotIn('id',$friendList)
-            ->inRandomOrder()->get();
+            ->inRandomOrder()->take(5)->get();
 
         return view('livewire.home-component', compact('posts', 'users', 'allPost'))->extends('layouts.master');
     }
@@ -134,11 +154,10 @@ class HomeComponent extends Component
 
     public function addFriend($friendID)
     {
-        $user = User::find($friendID);
        auth()->user()->friends()->create(
           [ 'friend_id' => $friendID]
        );
-       session()->flash('message', $user->getFullName() .' was successfully added to your friend list.');
+       session()->flash('message', 'Friend request was successfully sent and waiting for approval.');
        return redirect()->route('home');
     }
 
